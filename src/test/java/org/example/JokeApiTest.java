@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -55,7 +56,7 @@ class JokeApiTest {
   }
 
   @Test
-  void shouldFetchJokeByCategory() throws URISyntaxException {
+  void shouldFetchJokeByCategoryAndWriteItToFile() throws URISyntaxException {
 
     var categoriesResponse = performGetRequest(apiUri.resolve("/jod/categories"));
     assertTrue(categoriesResponse.isPresent());
@@ -70,9 +71,7 @@ class JokeApiTest {
     var categoryName = categories.get(2).getName();
     log.info("Fetching jokes by category name: {}", categoryName);
 
-    var uri = new URIBuilder(apiUri.resolve("/jod"))
-        .addParameter("category", categoryName)
-        .build();
+    var uri = new URIBuilder(apiUri.resolve("/jod")).addParameter("category", categoryName).build();
 
     var jokesResponse = performGetRequest(uri);
     assertTrue(jokesResponse.isPresent());
@@ -128,6 +127,10 @@ class JokeApiTest {
             log.error("Can't write joke to a file: ", e);
             throw new RuntimeException(e);
           }
+
+          var jokeFile = new File(path);
+          assertTrue(jokeFile.exists());
+          assertTrue(jokeFile.length() > 100);
         });
   }
 }
