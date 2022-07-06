@@ -1,0 +1,14 @@
+name: Main CI 
+on: [push]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Compile the code
+        run: mvn clean compile
+      - name: Run tests
+        run: mvn test
+      - name: Build an artifact
+        run: mvn package
