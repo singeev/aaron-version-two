@@ -46,21 +46,31 @@ class JokeApiTest {
   void shouldSuccessfullyGetResponseFromTestEndpoint() {
 
     var response = performGetRequest(apiUri.resolve("/jod/test"));
-    assertTrue(response.isPresent());
+    assertTrue(response.isPresent(), "Successful response can not have empty body");
 
     var data = response.get();
     assertAll(
-        () -> assertNull(data.getError()),
-        () -> assertNotEquals(404, data.getError().getCode()),
-        () -> assertNotEquals("Not Found", data.getError().getMessage()));
+        () -> assertNull(data.getError(), "Successful response shouldn't have error description"),
+        () ->
+            assertNotEquals(
+                404,
+                data.getError().getCode(),
+                "Successful response can not have HTTP status code 404"),
+        () ->
+            assertNotEquals(
+                "Not Found",
+                data.getError().getMessage(),
+                "Successful response can not have error message"));
   }
 
   @Test
   void shouldFetchJokeByCategoryAndWriteItToFile() throws URISyntaxException {
 
     var categoriesResponse = performGetRequest(apiUri.resolve("/jod/categories"));
-    assertTrue(categoriesResponse.isPresent());
-    assertNull(categoriesResponse.get().getError());
+    assertTrue(categoriesResponse.isPresent(), "Categories response can not have empty body");
+    assertNull(
+        categoriesResponse.get().getError(),
+        "Successful response shouldn't have error description");
 
     List<Category> categories = categoriesResponse.get().getContents().getCategories();
     log.info(
@@ -74,8 +84,9 @@ class JokeApiTest {
     var uri = new URIBuilder(apiUri.resolve("/jod")).addParameter("category", categoryName).build();
 
     var jokesResponse = performGetRequest(uri);
-    assertTrue(jokesResponse.isPresent());
-    assertNull(jokesResponse.get().getError());
+    assertTrue(jokesResponse.isPresent(), "Jokes response can not have empty body");
+    assertNull(
+        jokesResponse.get().getError(), "Successful response shouldn't have error description");
 
     List<JokeMeta> jokes = jokesResponse.get().getContents().getJokes();
     assertDoesNotThrow(() -> writeJokesToFile(jokes));
@@ -88,7 +99,10 @@ class JokeApiTest {
       request.setHeader(API_KEY_HEADER, API_KEY_VALUE);
 
       try (var response = client.execute(request)) {
-        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals(
+            200,
+            response.getStatusLine().getStatusCode(),
+            "Successful response should have HTTP status code 200");
         return deserializeResponse(response);
       }
 
@@ -144,7 +158,7 @@ class JokeApiTest {
 
   private void validateSavedFile(String path) {
     var jokeFile = new File(path);
-    assertTrue(jokeFile.exists());
-    assertTrue(jokeFile.length() > 100);
+    assertTrue(jokeFile.exists(), "Joke text file should not be missing");
+    assertTrue(jokeFile.length() > 100, "Text file size should be more than 100 bytes");
   }
 }
