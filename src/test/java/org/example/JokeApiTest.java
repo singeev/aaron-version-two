@@ -113,24 +113,34 @@ class JokeApiTest {
     jokes.forEach(
         joke -> {
           String path = "src/test/resources/" + joke.getJoke().getId() + ".txt";
-          StringJoiner content = new StringJoiner("\r\n");
-
-          content.add("Description: " + joke.getDescription());
-          content.add("Category: " + joke.getCategory());
-          content.add("Title: " + joke.getJoke().getTitle());
-          content.add("Text: " + joke.getJoke().getText());
-
-          try {
-            Files.writeString(Paths.get(path), content.toString());
-            log.info("Text file with a new joke successfully created: {}", path);
-          } catch (IOException e) {
-            log.error("Can't write joke to a file: ", e);
-            throw new RuntimeException(e);
-          }
-
-          var jokeFile = new File(path);
-          assertTrue(jokeFile.exists());
-          assertTrue(jokeFile.length() > 100);
+          var content = composeFileContent(joke);
+          writeFile(path, content);
+          validateSavedFile(path);
         });
+  }
+
+  private String composeFileContent(JokeMeta joke) {
+    StringJoiner content = new StringJoiner("\r\n");
+    content.add("Description: " + joke.getDescription());
+    content.add("Category: " + joke.getCategory());
+    content.add("Title: " + joke.getJoke().getTitle());
+    content.add("Text: " + joke.getJoke().getText());
+    return content.toString();
+  }
+
+  private void writeFile(String path, String content) {
+    try {
+      Files.writeString(Paths.get(path), content);
+      log.info("Text file with a new joke successfully created: {}", path);
+    } catch (IOException e) {
+      log.error("Can't write joke to a file: ", e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void validateSavedFile(String path) {
+    var jokeFile = new File(path);
+    assertTrue(jokeFile.exists());
+    assertTrue(jokeFile.length() > 100);
   }
 }
