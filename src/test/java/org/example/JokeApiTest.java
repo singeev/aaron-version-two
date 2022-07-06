@@ -98,13 +98,17 @@ class JokeApiTest {
     }
   }
 
-  private Optional<DataResponse> deserializeResponse(CloseableHttpResponse response)
-      throws IOException {
-    var entity = response.getEntity();
-    if (entity != null) {
-      String json = EntityUtils.toString(entity);
-      var dataResponse = objectMapper.readValue(json, DataResponse.class);
-      return of(dataResponse);
+  private Optional<DataResponse> deserializeResponse(CloseableHttpResponse response) {
+    try {
+      var entity = response.getEntity();
+      if (entity != null) {
+        String json = EntityUtils.toString(entity);
+        var dataResponse = objectMapper.readValue(json, DataResponse.class);
+        return of(dataResponse);
+      }
+    } catch (IOException e) {
+      log.error("Failed to read response body: ", e);
+      throw new RuntimeException(e);
     }
     return empty();
   }
